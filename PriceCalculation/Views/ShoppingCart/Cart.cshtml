@@ -1,0 +1,103 @@
+﻿
+<script>
+    function run() {        
+        document.getElementById("st").value = (document.getElementById("ddl").value) * (document.getElementById("subt").value)*(.01);
+        document.getElementById("tp").value = parseFloat(document.getElementById("st").value) + parseFloat(document.getElementById("subt").value);
+    }
+</script>
+@{
+    Layout = null;
+}
+@using PriceCalculation.Controllers;
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Cart</title>
+</head>
+<body>
+    @using (Html.BeginForm("Update", "ShoppingCart", FormMethod.Post))
+    {
+    <table cellpadding="2" cellspacing="2" border="1">
+        <tr>
+            <th>Option</th>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Quantity <input type="submit" value="Update" /></th>
+            <th>Total</th>
+        </tr>
+        @{decimal s = 0;}
+        @foreach (Item item in (List<Item>)Session["cart"])
+        {
+            if(item.Product.Discount)
+            {
+                s += (item.Product.Price * item.Quantity) - (item.Product.Price * item.Quantity)/10;
+            }
+            else
+            {
+                s += item.Product.Price * item.Quantity;
+            }
+
+            <tr>
+                <td>@Html.ActionLink("Delete", "Delete", "ShoppingCart", new { Id = item.Product.Id }, null)</td>
+                <td>@item.Product.Id</td>
+                <td>@item.Product.Description</td>
+                <td>@item.Product.Price</td>
+                <td>@if (item.Product.Discount)
+                    {
+                     <p>10% discount</p>
+                    } else
+                    {
+                    <p>No discount</p>
+                    }
+                </td>
+                <td><input type="text" name="quantity" value="@item.Quantity" /></td>
+                <td>@if (item.Product.Discount)
+                {
+                    @(item.Product.Price * item.Quantity * .9);
+                }
+                else
+                {
+                    @(item.Product.Price * item.Quantity);
+                }
+                    
+            </td>
+
+
+        </tr>
+
+        }
+        <tr>
+            <td align="right" colspan="6">Order SubTotal</td>
+            <td><input type="text" id="subt" value="@s"></td>
+        </tr>
+        <tr>
+            <td align="right" colspan="6">State</td>
+            <td>
+                <select id="ddl" onchange="run()">
+                    <option selected ="selected">select</option>
+                    <option value="0">TX</option>
+                    <option value="5">CT</option>
+                    <option value="5">NJ</option>                    
+                    <option value="0">FL</option>
+                    <option value="10">CA</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td align="right" colspan="6">SalesTax</td>            
+            <td><input type="text" id="st"></td>            
+        </tr>
+        <tr>
+            <td align="right" colspan="6">Order Total</td>
+            <td><input type="text" id="tp"></td>
+        </tr>
+    </table>
+    }
+    <br /><br />
+    @Html.ActionLink("Back to Widgets", "Index", "Products"); 
+</body>
+</html>
